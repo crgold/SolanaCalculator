@@ -3015,17 +3015,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "solana-bpf-helloworld"
-version = "0.0.1"
-dependencies = [
- "borsh",
- "borsh-derive 0.10.0",
- "solana-program",
- "solana-program-test",
- "solana-sdk",
-]
-
-[[package]]
 name = "solana-bpf-loader-program"
 version = "1.10.35"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3042,6 +3031,17 @@ dependencies = [
  "solana-zk-token-sdk",
  "solana_rbpf",
  "thiserror",
+]
+
+[[package]]
+name = "solana-bpf-solana_calculator"
+version = "0.0.1"
+dependencies = [
+ "borsh",
+ "borsh-derive 0.10.0",
+ "solana-program",
+ "solana-program-test",
+ "solana-sdk",
 ]
 
 [[package]]

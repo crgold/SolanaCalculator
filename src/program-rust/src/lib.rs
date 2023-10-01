@@ -24,7 +24,7 @@ entrypoint!(process_instruction);
 pub fn process_instruction(
     program_id: &Pubkey, // Public key of the account the hello world program was loaded into
     accounts: &[AccountInfo], // The account to say hello to
-    _instruction_data: &[u8], // Ignored, all helloworld instructions are hellos
+    _instruction_data: &[u8],
 ) -> ProgramResult {
 
     // Iterating accounts is safer than indexing
@@ -40,7 +40,7 @@ pub fn process_instruction(
     }
 
     // get instruction provided by user
-    let instruction = CalculatorInstruction::unpack(instruction_data)?;
+    let instruction = CalculatorInstruction::unpack(_instruction_data)?;
 
     // get users CalculatorAccount
     let mut calculator_account = CalculatorAccount::try_from_slice(&account.data.borrow())?;

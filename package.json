@@ -23,10 +23,9 @@
     "pretty": "prettier --write '{,src/**/}*.ts'"
   },
   "dependencies": {
-    "@solana/buffer-layout": "^3.0.0",
-    "@solana/web3.js": "^1.33.0",
+    "@project-serum/borsh": "^0.2.5",
+    "@solana/web3.js": "^1.41.0",
     "borsh": "^0.7.0",
-    "buffer": "^6.0.3",
     "mz": "^2.7.0",
     "yaml": "^2.3.2"
   },

@@ -13,9 +13,8 @@ import {
 } from '@solana/web3.js';
 import fs from 'mz/fs';
 import path from 'path';
+import * as borsh_layout from '@project-serum/borsh'
 import * as borsh from 'borsh';
-import * as BufferLayout from "@solana/buffer-layout";
-import { Buffer } from "buffer";
 
 import {getPayer, getRpcUrl, createKeypairFromFile} from './utils';
 
@@ -198,10 +197,10 @@ export async function checkProgram(): Promise<void> {
 }
 
 function addInstruction(val1: number, val2: number): Buffer {
-  const layout = BufferLayout.struct([
-    BufferLayout.u8("instruction"),
-    BufferLayout.u32("val1"),
-    BufferLayout.u32("val2"),
+  const layout = borsh_layout.struct([
+    borsh_layout.u8("instruction"),
+    borsh_layout.u32("val1"),
+    borsh_layout.u32("val2"),
   ]);
   const data = Buffer.alloc(layout.span);
   layout.encode({ instruction: 0, val1, val2 }, data);
@@ -210,10 +209,10 @@ function addInstruction(val1: number, val2: number): Buffer {
 }
 
 function subtractInstruction(val1: number, val2: number): Buffer {
-  const layout = BufferLayout.struct([
-    BufferLayout.u8("instruction"),
-    BufferLayout.u32("val1"),
-    BufferLayout.u32("val2"),
+  const layout = borsh_layout.struct([
+    borsh_layout.u8("instruction"),
+    borsh_layout.u32("val1"),
+    borsh_layout.u32("val2"),
   ]);
   const data = Buffer.alloc(layout.span);
   layout.encode({ instruction: 1, val1, val2 }, data);

@@ -127,7 +127,7 @@ npm run build:program-c
 ### Deploy the on-chain program
 
 ```bash
-solana program deploy dist/program/helloworld.so
+solana program deploy dist/program/solana_calculator.so
 ```
 
 ### Run the JavaScript client
