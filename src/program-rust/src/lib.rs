@@ -7,12 +7,14 @@ use solana_program::{
     program_error::ProgramError,
     pubkey::Pubkey,
 };
+pub mod instruction;
+use instruction::{CalculatorInstruction};
 
 /// Define the type of state stored in accounts
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
-pub struct GreetingAccount {
+pub struct CalculatorAccount {
     /// number of greetings
-    pub counter: u32,
+    pub result: u32,
 }
 
 // Declare and export the program's entrypoint
@@ -24,28 +26,44 @@ pub fn process_instruction(
     accounts: &[AccountInfo], // The account to say hello to
     _instruction_data: &[u8], // Ignored, all helloworld instructions are hellos
 ) -> ProgramResult {
-    msg!("Hello World Rust program entrypoint");
 
     // Iterating accounts is safer than indexing
     let accounts_iter = &mut accounts.iter();
 
-    // Get the account to say hello to
+    // Get the account where result will be stored
     let account = next_account_info(accounts_iter)?;
 
     // The account must be owned by the program in order to modify its data
     if account.owner != program_id {
-        msg!("Greeted account does not have the correct program id");
+        msg!("Calculator account does not have the correct program id");
         return Err(ProgramError::IncorrectProgramId);
     }
 
-    // Increment and store the number of times the account has been greeted
-    let mut greeting_account = GreetingAccount::try_from_slice(&account.data.borrow())?;
-    greeting_account.counter += 1;
-    greeting_account.serialize(&mut &mut account.data.borrow_mut()[..])?;
+    // get instruction provided by user
+    let instruction = CalculatorInstruction::unpack(instruction_data)?;
 
-    msg!("Greeted {} time(s)!", greeting_account.counter);
+    // get users CalculatorAccount
+    let mut calculator_account = CalculatorAccount::try_from_slice(&account.data.borrow())?;
 
-    Ok(())
+    // use a match to determine the operation entered by the user
+    match instruction {
+        CalculatorInstruction::Add {val1, val2} => {
+            calculator_account.result = val1 + val2;
+            calculator_account.serialize(&mut &mut account.data.borrow_mut()[..])?;
+
+            msg!("Added {} and {} which resulted in a result of {}", val1, val2, calculator_account.result);
+
+            Ok(())
+        },
+        CalculatorInstruction::Subtract {val1, val2} => {
+            calculator_account.result = val1 - val2;
+            calculator_account.serialize(&mut &mut account.data.borrow_mut()[..])?;
+
+            msg!("Subtracted {} from {} which resulted in a result of {}", val1, val2, calculator_account.result);
+
+            Ok(())
+        }
+    }
 }
 
 // Sanity tests

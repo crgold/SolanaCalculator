@@ -14,6 +14,8 @@ import {
 import fs from 'mz/fs';
 import path from 'path';
 import * as borsh from 'borsh';
+import * as BufferLayout from "@solana/buffer-layout";
+import { Buffer } from "buffer";
 
 import {getPayer, getRpcUrl, createKeypairFromFile} from './utils';
 
@@ -35,7 +37,7 @@ let programId: PublicKey;
 /**
  * The public key of the account we are saying hello to
  */
-let greetedPubkey: PublicKey;
+let calculatorPubkey: PublicKey;
 
 /**
  * Path to program files
@@ -48,22 +50,22 @@ const PROGRAM_PATH = path.resolve(__dirname, '../../dist/program');
  *   - `npm run build:program-c`
  *   - `npm run build:program-rust`
  */
-const PROGRAM_SO_PATH = path.join(PROGRAM_PATH, 'helloworld.so');
+const PROGRAM_SO_PATH = path.join(PROGRAM_PATH, 'solana_calculator.so');
 
 /**
  * Path to the keypair of the deployed program.
  * This file is created when running `solana program deploy dist/program/helloworld.so`
  */
-const PROGRAM_KEYPAIR_PATH = path.join(PROGRAM_PATH, 'helloworld-keypair.json');
+const PROGRAM_KEYPAIR_PATH = path.join(PROGRAM_PATH, 'solana_calculator-keypair.json');
 
 /**
- * The state of a greeting account managed by the hello world program
+ * The state of a calculator account managed by the hello world program
  */
-class GreetingAccount {
-  counter = 0;
-  constructor(fields: {counter: number} | undefined = undefined) {
+class CalculatorAccount {
+  result = 0;
+  constructor(fields: {result: number} | undefined = undefined) {
     if (fields) {
-      this.counter = fields.counter;
+      this.result = fields.result;
     }
   }
 }
@@ -71,16 +73,16 @@ class GreetingAccount {
 /**
  * Borsh schema definition for greeting accounts
  */
-const GreetingSchema = new Map([
-  [GreetingAccount, {kind: 'struct', fields: [['counter', 'u32']]}],
+const CalculatorSchema = new Map([
+  [CalculatorAccount, {kind: 'struct', fields: [['result', 'u32']]}],
 ]);
 
 /**
  * The expected size of each greeting account.
  */
-const GREETING_SIZE = borsh.serialize(
-  GreetingSchema,
-  new GreetingAccount(),
+const CALCULATOR_SIZE = borsh.serialize(
+  CalculatorSchema,
+  new CalculatorAccount(),
 ).length;
 
 /**
@@ -102,7 +104,7 @@ export async function establishPayer(): Promise<void> {
     const {feeCalculator} = await connection.getRecentBlockhash();
 
     // Calculate the cost to fund the greeter account
-    fees += await connection.getMinimumBalanceForRentExemption(GREETING_SIZE);
+    fees += await connection.getMinimumBalanceForRentExemption(CALCULATOR_SIZE);
 
     // Calculate the cost of sending transactions
     fees += feeCalculator.lamportsPerSignature * 100; // wag
@@ -131,7 +133,7 @@ export async function establishPayer(): Promise<void> {
 }
 
 /**
- * Check if the hello world BPF program has been deployed
+ * Check if the solana calculator BPF program has been deployed
  */
 export async function checkProgram(): Promise<void> {
   // Read program id from keypair file
@@ -160,34 +162,34 @@ export async function checkProgram(): Promise<void> {
   }
   console.log(`Using program ${programId.toBase58()}`);
 
-  // Derive the address (public key) of a greeting account from the program so that it's easy to find later.
-  const GREETING_SEED = 'hello';
-  greetedPubkey = await PublicKey.createWithSeed(
+  // Derive the address (public key) of a calculator account from the program so that it's easy to find later.
+  const CALCULATOR_SEED = 'calc me daddy';
+  calculatorPubkey = await PublicKey.createWithSeed(
     payer.publicKey,
-    GREETING_SEED,
+    CALCULATOR_SEED,
     programId,
   );
 
-  // Check if the greeting account has already been created
-  const greetedAccount = await connection.getAccountInfo(greetedPubkey);
-  if (greetedAccount === null) {
+  // Check if the calculator account has already been created
+  const calculatorAccount = await connection.getAccountInfo(calculatorPubkey);
+  if (calculatorAccount === null) {
     console.log(
       'Creating account',
-      greetedPubkey.toBase58(),
-      'to say hello to',
+      calculatorPubkey.toBase58(),
+      'to save calculator results to',
     );
     const lamports = await connection.getMinimumBalanceForRentExemption(
-      GREETING_SIZE,
+      CALCULATOR_SIZE,
     );
 
     const transaction = new Transaction().add(
       SystemProgram.createAccountWithSeed({
         fromPubkey: payer.publicKey,
         basePubkey: payer.publicKey,
-        seed: GREETING_SEED,
-        newAccountPubkey: greetedPubkey,
+        seed: CALCULATOR_SEED,
+        newAccountPubkey: calculatorPubkey,
         lamports,
-        space: GREETING_SIZE,
+        space: CALCULATOR_SIZE,
         programId,
       }),
     );
@@ -195,15 +197,46 @@ export async function checkProgram(): Promise<void> {
   }
 }
 
+function addInstruction(val1: number, val2: number): Buffer {
+  const layout = BufferLayout.struct([
+    BufferLayout.u8("instruction"),
+    BufferLayout.u32("val1"),
+    BufferLayout.u32("val2"),
+  ]);
+  const data = Buffer.alloc(layout.span);
+  layout.encode({ instruction: 0, val1, val2 }, data);
+
+  return data;
+}
+
+function subtractInstruction(val1: number, val2: number): Buffer {
+  const layout = BufferLayout.struct([
+    BufferLayout.u8("instruction"),
+    BufferLayout.u32("val1"),
+    BufferLayout.u32("val2"),
+  ]);
+  const data = Buffer.alloc(layout.span);
+  layout.encode({ instruction: 1, val1, val2 }, data);
+  return data;
+}
+const instructionMap: Record<string, (num1: number, num2: number) => Buffer> = {
+  add: addInstruction,
+  subtract: subtractInstruction,
+};
+
 /**
- * Say hello
+ * Let's do some math!
  */
-export async function sayHello(): Promise<void> {
-  console.log('Saying hello to', greetedPubkey.toBase58());
+export async function calculateInput(
+  operation: string,
+  val1: number,
+  val2: number
+  ): Promise<void> {
+  const instructionHandler = instructionMap[operation];
   const instruction = new TransactionInstruction({
-    keys: [{pubkey: greetedPubkey, isSigner: false, isWritable: true}],
+    keys: [{pubkey: calculatorPubkey, isSigner: false, isWritable: true}],
     programId,
-    data: Buffer.alloc(0), // All instructions are hellos
+    data: instructionHandler(val1, val2),
   });
   await sendAndConfirmTransaction(
     connection,
@@ -213,22 +246,25 @@ export async function sayHello(): Promise<void> {
 }
 
 /**
- * Report the number of times the greeted account has been said hello to
+ * Return the result of the calculation
  */
-export async function reportGreetings(): Promise<void> {
-  const accountInfo = await connection.getAccountInfo(greetedPubkey);
+export async function reportResult(
+  operation: string,
+  val1: number,
+  val2: number
+): Promise<void> {
+  const accountInfo = await connection.getAccountInfo(calculatorPubkey);
   if (accountInfo === null) {
     throw 'Error: cannot find the greeted account';
   }
-  const greeting = borsh.deserialize(
-    GreetingSchema,
-    GreetingAccount,
+  const calculator = borsh.deserialize(
+    CalculatorSchema,
+    CalculatorAccount,
     accountInfo.data,
   );
-  console.log(
-    greetedPubkey.toBase58(),
-    'has been greeted',
-    greeting.counter,
-    'time(s)',
-  );
+
+  const operationType = operation === "add" ? "+" : "-";
+
+  console.log("Result of input:");
+  console.log(`${val1} ${operationType} ${val2} is equal to ${calculator.result}`);
 }

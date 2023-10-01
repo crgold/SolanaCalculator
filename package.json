@@ -1,10 +1,10 @@
 {
-  "name": "helloworld",
+  "name": "solana_calculator",
   "version": "0.0.1",
   "description": "",
   "repository": {
     "type": "git",
-    "url": "https://github.com/solana-labs/example-helloworld"
+    "url": "https://github.com/crgold/SolanaCalculator"
   },
   "keywords": [],
   "author": "",
@@ -23,16 +23,18 @@
     "pretty": "prettier --write '{,src/**/}*.ts'"
   },
   "dependencies": {
+    "@solana/buffer-layout": "^3.0.0",
     "@solana/web3.js": "^1.33.0",
     "borsh": "^0.7.0",
+    "buffer": "^6.0.3",
     "mz": "^2.7.0",
-    "yaml": "^2.0.0"
+    "yaml": "^2.3.2"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",
     "@types/eslint": "^8.2.2",
     "@types/eslint-plugin-prettier": "^3.1.0",
-    "@types/mz": "^2.7.2",
+    "@types/mz": "^2.7.5",
     "@types/prettier": "^2.1.5",
     "@types/yaml": "^1.9.7",
     "@typescript-eslint/eslint-plugin": "^4.6.0",
