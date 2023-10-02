@@ -151,7 +151,7 @@ export async function checkProgram(): Promise<void> {
   if (programInfo === null) {
     if (fs.existsSync(PROGRAM_SO_PATH)) {
       throw new Error(
-        'Program needs to be deployed with `solana program deploy dist/program/helloworld.so`',
+        'Program needs to be deployed with `solana program deploy dist/program/solana_calculator.so`',
       );
     } else {
       throw new Error('Program needs to be built and deployed');
