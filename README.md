@@ -4,14 +4,7 @@
   </a>
 </p>
 
-[![Build status][travis-image]][travis-url] [![Gitpod
-Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/solana-labs/example-helloworld)
-
-[travis-image]:
-https://travis-ci.org/solana-labs/example-helloworld.svg?branch=master
-[travis-url]: https://travis-ci.org/solana-labs/example-helloworld
-
-# Hello world on Solana
+# Rust Calculator on Solana
 
 This project demonstrates how to use the [Solana Javascript
 API](https://github.com/solana-labs/solana-web3.js) to
@@ -19,13 +12,8 @@ interact with programs on the Solana blockchain.
 
 The project comprises of:
 
-* An on-chain hello world program
-* A client that can send a "hello" to an account and get back the number of
-  times "hello" has been sent
-
-## Translations
-- [Traditional Chinese](README_ZH_TW.md)
-- [Simplified Chinese](README_ZH_CN.md)
+* An on-chain calculator program that performs addition and subtrations
+* A client that can send a an operation and opperands to an account and return the result
 
 ## Table of Contents
 - [Hello world on Solana](#hello-world-on-solana)
@@ -141,13 +129,13 @@ npm run start
 Public key values will differ:
 
 ```bash
-Let's say hello to a Solana account...
-Connection to cluster established: http://127.0.0.1:8899 { 'feature-set': 2045430982, 'solana-core': '1.7.8' }
-Using account AiT1QgeYaK86Lf9kudqKthQPCWwpG8vFA1bAAioBoF4X containing 0.00141872 SOL to pay for fees
-Using program Dro9uk45fxMcKWGb1eWALujbTssh6DW8mb4x8x3Eq5h6
-Creating account 8MBmHtJvxpKdYhdw6yPpedp6X6y2U9dCpdYaZJdmwV3A to say hello to
-Saying hello to 8MBmHtJvxpKdYhdw6yPpedp6X6y2U9dCpdYaZJdmwV3A
-8MBmHtJvxpKdYhdw6yPpedp6X6y2U9dCpdYaZJdmwV3A has been greeted 1 times
+Let's do some math...
+Connection to cluster established: https://api.devnet.solana.com { 'feature-set': 4033350765, 'solana-core': '1.16.18' }
+Using account 9piVDFEFLRDDQVeb32shWbAN7tvcYJc73oD3gaC5Xgvp containing 27.956692632 SOL to pay for fees
+Using program 143MFttHUqpuKfKMHUbK5RKV8Gf2KD3aYthuyq8qM9JJ
+Creating account AVsDKrwm6nw3EhVNX9FeTifKQprRs1DAcBqVcb757GBL to save calculator results to
+Result of input:
+1 + 1 is equal to 2
 Success
 ```
 
@@ -162,7 +150,7 @@ Success
     Status: Error processing Instruction 0: Program failed to complete
     Log Messages:
       Program G5bbS1ipWzqQhekkiCLn6u7Y1jJdnGK85ceSYLx2kKbA invoke [1]
-      Program log: Hello World Rust program entrypoint
+      Program log: Calculator Rust program entrypoint
       Program G5bbS1ipWzqQhekkiCLn6u7Y1jJdnGK85ceSYLx2kKbA consumed 200000 of 200000 compute units
       Program failed to complete: exceeded maximum number of instructions allowed (200000) at instruction #334
       Program G5bbS1ipWzqQhekkiCLn6u7Y1jJdnGK85ceSYLx2kKbA failed: Program failed to complete
@@ -206,34 +194,32 @@ The client ensures there is an account available to pay for transactions,
 and creates one if there is not, by calling
 [`establishPayer`](https://github.com/solana-labs/example-helloworld/blob/ad52dc719cdc96d45ad8e308e8759abf4792b667/src/client/hello_world.ts#L102).
 
-### Check if the helloworld on-chain program has been deployed
+### Check if the calculator on-chain program has been deployed
 
-In [`checkProgram`](https://github.com/solana-labs/example-helloworld/blob/ad52dc719cdc96d45ad8e308e8759abf4792b667/src/client/hello_world.ts#L144),
-the client loads the keypair of the deployed program from `./dist/program/helloworld-keypair.json` and uses
+In [`checkProgram`](https://github.com/solana-labs/example-helloworld/blob/ad52dc719cdc96d45ad8e308e8759abf4792b667/src/client/hcalculator.ts#L144),
+the client loads the keypair of the deployed program from `./dist/program/calculator-keypair.json` and uses
 the public key for the keypair to fetch the program account. If the program doesn't exist, the client halts
 with an error. If the program does exist, it will create a new account with the program assigned as its owner
 to store program state (number of hello's processed).
 
-### Send a "Hello" transaction to the on-chain program
+### Send a transaction to the on-chain program
 
-The client then constructs and sends a "Hello" transaction to the program by
+The client then constructs and sends a calculation transaction to the program by
 calling
-[`sayHello`](https://github.com/solana-labs/example-helloworld/blob/ad52dc719cdc96d45ad8e308e8759abf4792b667/src/client/hello_world.ts#L209).
+[`sayHello`](https://github.com/solana-labs/example-helloworld/blob/ad52dc719cdc96d45ad8e308e8759abf4792b667/src/client/calculator.ts#L209).
 The transaction contains a single very simple instruction that primarily carries
-the public key of the helloworld program account to call and the "greeter"
-account to which the client wishes to say "Hello" to.
+the public key of the hcalculator program account to call and the results
+account to which the client wishes to store the result in.
 
-### Query the Solana account used in the "Hello" transaction
+### Query the Solana account used in the calculator transaction
 
-Each time the client says "Hello" to an account, the program increments a
-numerical count in the "greeter" account's data.  The client queries the
-"greeter" account's data to discover the current number of times the account has
-been greeted by calling
-[`reportGreetings`](https://github.com/solana-labs/example-helloworld/blob/ad52dc719cdc96d45ad8e308e8759abf4792b667/src/client/hello_world.ts#L226).
+Each time the client poerforms a calculation, the program stores the result in the account's data. The client queries the
+result account's data to discover the last result by calling
+[`reportGreetings`](https://github.com/solana-labs/example-helloworld/blob/ad52dc719cdc96d45ad8e308e8759abf4792b667/src/client/calculator.ts#L226).
 
 ## Learn about the on-chain program
 
-The [on-chain helloworld program](/src/program-rust/Cargo.toml) is a Rust program
+The [on-chain calculator program](/src/program-rust/Cargo.toml) is a Rust program
 compiled to [Berkeley Packet Filter
 (BPF)](https://en.wikipedia.org/wiki/Berkeley_Packet_Filter) bytecode and stored as an
 [Executable and Linkable Format (ELF) shared

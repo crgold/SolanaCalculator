@@ -70,14 +70,14 @@ class CalculatorAccount {
 }
 
 /**
- * Borsh schema definition for greeting accounts
+ * Borsh schema definition for calculator accounts
  */
 const CalculatorSchema = new Map([
   [CalculatorAccount, {kind: 'struct', fields: [['result', 'u32']]}],
 ]);
 
 /**
- * The expected size of each greeting account.
+ * The expected size of each calculator account.
  */
 const CALCULATOR_SIZE = borsh.serialize(
   CalculatorSchema,
@@ -162,7 +162,7 @@ export async function checkProgram(): Promise<void> {
   console.log(`Using program ${programId.toBase58()}`);
 
   // Derive the address (public key) of a calculator account from the program so that it's easy to find later.
-  const CALCULATOR_SEED = 'calc me daddy';
+  const CALCULATOR_SEED = 'calc me solana';
   calculatorPubkey = await PublicKey.createWithSeed(
     payer.publicKey,
     CALCULATOR_SEED,
