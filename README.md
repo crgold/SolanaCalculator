@@ -16,7 +16,7 @@ The project comprises of:
 * A client that can send a an operation and opperands to an account and return the result
 
 ## Table of Contents
-- [Hello world on Solana](#hello-world-on-solana)
+- [Calculator on Solana](#hello-world-on-solana)
   - [Table of Contents](#table-of-contents)
   - [Quick Start](#quick-start)
     - [Configure CLI](#configure-cli)
@@ -32,9 +32,9 @@ The project comprises of:
   - [Learn about the client](#learn-about-the-client)
     - [Entrypoint](#entrypoint)
     - [Establish a connection to the cluster](#establish-a-connection-to-the-cluster)
-    - [Check if the helloworld on-chain program has been deployed](#check-if-the-helloworld-on-chain-program-has-been-deployed)
-    - [Send a "Hello" transaction to the on-chain program](#send-a-hello-transaction-to-the-on-chain-program)
-    - [Query the Solana account used in the "Hello" transaction](#query-the-solana-account-used-in-the-hello-transaction)
+    - [Check if the calculator on-chain program has been deployed](#check-if-the-helloworld-on-chain-program-has-been-deployed)
+    - [Send a calculator transaction to the on-chain program](#send-a-hello-transaction-to-the-on-chain-program)
+    - [Query the Solana account used in the calculator transaction](#query-the-solana-account-used-in-the-hello-transaction)
   - [Learn about the on-chain program](#learn-about-the-on-chain-program)
     - [Programming on Solana](#programming-on-solana)
   - [Pointing to a public Solana cluster](#pointing-to-a-public-solana-cluster)
@@ -43,7 +43,7 @@ The project comprises of:
 ## Quick Start
 
 [![Open in
-Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/solana-labs/example-helloworld)
+Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://github.com/crgold/SolanaCalculator.git)
 
 If you decide to open in Gitpod then refer to
 [README-gitpod.md](README-gitpod.md), otherwise continue reading.
