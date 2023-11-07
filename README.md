@@ -43,7 +43,7 @@ The project comprises of:
 ## Quick Start
 
 [![Open in
-Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://github.com/crgold/SolanaCalculator.git)
+Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/new/#https://github.com/crgold/SolanaCalculator.git)
 
 If you decide to open in Gitpod then refer to
 [README-gitpod.md](README-gitpod.md), otherwise continue reading.
